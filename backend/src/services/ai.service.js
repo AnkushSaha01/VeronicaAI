@@ -1,8 +1,18 @@
 // import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatMistralAI } from "@langchain/mistralai";
 import config from "../config/config.js";
-import { createAgent, toolStrategy } from "langchain";
+import { createAgent, toolStrategy, tool } from "langchain";
 import z from "zod";
+import { searchWeb } from "../tools/search.tool.js";
+
+const search_tool = tool(searchWeb, {
+  name: "search_tool",
+  description:
+    "Use this tool to find latest information on the internet. Mandatory to use this tool if you don't have the information about user query.",
+  schema: z.object({
+    query: z.string().describe("The search query to find information about"),
+  }),
+});
 
 const model = new ChatMistralAI({
   model: "mistral-medium-latest",
@@ -11,7 +21,7 @@ const model = new ChatMistralAI({
 
 const agent = createAgent({
   model,
-  tools: [],
+  tools: [search_tool],
 });
 export async function getStream(messages) {
   const response = await agent.stream(
@@ -27,7 +37,6 @@ export async function generateResponse(messages) {
   const response = await model.invoke(messages);
   return response;
 }
-
 
 export async function getTitle({ message }) {
   const titleAgent = createAgent({

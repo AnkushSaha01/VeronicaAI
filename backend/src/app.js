@@ -5,12 +5,11 @@ import cookieParser from "cookie-parser";
 import chatRoutes from "./routes/chat.routes.js";
 import passport from "passport";
 import configurePassport from "./config/passport.js";
-// import mongoose from "mongoose";
 import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
-// Middleware
+// Middlewares
 app.use(cors({
     origin: "http://localhost:3000",
     credentials: true

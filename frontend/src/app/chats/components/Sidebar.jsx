@@ -91,15 +91,18 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               <div
                 key={chat._id}
                 onClick={() => handleSelectChat(chat._id)}
-                className={`group flex items-center justify-between gap-2 px-3 py-2.5 rounded-md cursor-pointer transition-all text-sm
+                className={`relative group flex items-center justify-between gap-2 overflow-hidden px-3 py-2.5 rounded-md cursor-pointer transition-all text-sm
                                       ${
                                         activeChatId === chat._id
-                                          ? "bg-linear-to-r from-transparent to-[#7f3294]/60 text-white "
+                                          ? "bg-linear-to-r from-transparent to-[#7f3c92] text-white "
                                           : "text-gray-200 hover:bg-violet-200/20 hover:text-gray-200 "
                                       }
                                   `}
               >
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                {activeChatId === chat._id && (
+                  <div className="absolute right-0 top-0 h-full w-10 bg-linear-to-l from-[#f0b8ff]/50 to-transparent blur-sm pointer-events-none"></div>
+                )}
+                <div className="relative z-10 flex items-center gap-2.5 min-w-0 flex-1">
                   <MessageSquare
                     className={`w-4 h-4 shrink-0 ${activeChatId === chat._id ? "text-white" : "text-gray-200"}`}
                   />
@@ -109,7 +112,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 </div>
                 <button
                   onClick={(e) => handleDeleteChat(e, chat._id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-white/10 text-gray-500 hover:text-red-400 transition-all duration-200"
+                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-md hover:text-white hover:bg-red-400 transition-all duration-200 ${activeChatId === chat._id ? "text-white" : "text-gray-200"}`}
                   title="Delete chat"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
