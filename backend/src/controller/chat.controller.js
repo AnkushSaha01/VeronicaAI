@@ -1,12 +1,22 @@
 import { getStream, getTitle } from "../services/ai.service.js";
 import * as chatDao from "../dao/chat.dao.js";
-// import { tavily  } from "@tavily/core";
-// import config from "../config/config.js";
+import { ingestPDF } from "../tools/rag.tool.js";
+import fs from "fs";
 
 export async function handleMessage(req, res) {
   const message = req.body.message;
-  // console.log(message);
   const { chatId } = req.body;
+
+  if (req.file) {
+    try {
+      const pdfPath = req.file.path;
+      await ingestPDF(pdfPath);
+      fs.unlinkSync(pdfPath);
+    } catch (error) {
+      console.error("Error ingesting file:", error);
+    }
+  }
+
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -30,7 +40,8 @@ export async function handleMessage(req, res) {
     const messages = [
       {
         role: "system",
-        content: "You are a helpful assistant. If you don't have the answer to the user's query, use the tool search_tool to find the answer on the internet. Try to answer only in 100 words or less"
+        content:
+          "You are a helpful assistant. If you don't have the answer to the user's query, use the tool rag_tool to search the document database first, and if not found, use the search_tool to find the answer on the internet. Try to answer only in 100 words or less",
       },
       {
         role: "user",
@@ -46,9 +57,9 @@ export async function handleMessage(req, res) {
 
     for await (const chunk of stream) {
       const messageChunk = Array.isArray(chunk) ? chunk[0] : chunk;
-      
+
       // Only stream back AI generated responses, ignore tool outputs or intermediate steps
-      if (messageChunk.getType() === 'ai' && messageChunk.content) {
+      if (messageChunk.getType() === "ai" && messageChunk.content) {
         const aiChunk = messageChunk.content;
         AIResponse += aiChunk;
         res.write(`data: ${JSON.stringify({ chunk: aiChunk })}\n\n`);
@@ -59,7 +70,10 @@ export async function handleMessage(req, res) {
   };
 
   try {
-    const [chatIdNew, AIMessage] = await Promise.all([generateTitle(), aiResponse()]);
+    const [chatIdNew, AIMessage] = await Promise.all([
+      generateTitle(),
+      aiResponse(),
+    ]);
 
     console.log("Saving messages with chatId:", chatIdNew);
     console.log("User message:", message);
@@ -68,7 +82,7 @@ export async function handleMessage(req, res) {
     const savedUserMsg = await chatDao.saveMessage({
       chatId: chatIdNew,
       sender: "user",
-      content: message,
+      content: req.file ? `[FILE:${req.file.originalname}]\n\n${message}` : message,
     });
     console.log("User message saved successfully:", savedUserMsg._id);
 
@@ -78,7 +92,6 @@ export async function handleMessage(req, res) {
       content: AIMessage || " ", // Fallback in case AIMessage is empty to prevent Mongoose required validation failure
     });
     console.log("AI message saved successfully:", savedAiMsg._id);
-
   } catch (error) {
     console.error("Error occurred while saving messages to database:", error);
   } finally {
@@ -100,17 +113,16 @@ export async function getMessages(req, res) {
   const { chatId } = req.params;
   try {
     const messages = await chatDao.getMessagesForChat(chatId);
-    const formattedMessages = messages.map(m => ({
-      role: m.sender === 'ai' ? 'assistant' : m.sender,
+    const formattedMessages = messages.map((m) => ({
+      role: m.sender === "ai" ? "assistant" : m.sender,
       content: m.content,
-      timestamp: m.createdAt
+      timestamp: m.createdAt,
     }));
     res.json(formattedMessages);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 }
-
 
 // const tvly = tavily({ apiKey: config.TAVILY_API_KEY });
 
@@ -140,22 +152,22 @@ export async function getMessages(req, res) {
 //   const aiResponse = async () => {
 //     // 1. Search the web using the user's prompt
 //     const searchResponse = await tvly.search(userPrompt, {
-//        includeAnswer: true, 
-//        maxResults: 5 
+//        includeAnswer: true,
+//        maxResults: 5
 //     });
-    
+
 //     console.log("Tavily answer:", searchResponse.answer);
-    
+
 //     // 2. Feed the search context + the user prompt to MistralAI
 //     const myAiPrompt = `
 //       You are a helpful assistant. Use the following real-time web results to answer the user's query.
-      
+
 //       Web Context:
 //       ${JSON.stringify(searchResponse.results)}
-      
+
 //       User Query: ${userPrompt}
 //     `;
-    
+
 //     const messages = [
 //       {
 //         role: "user",
@@ -205,5 +217,3 @@ export async function getMessages(req, res) {
 //     res.end();
 //   }
 // }
-
-

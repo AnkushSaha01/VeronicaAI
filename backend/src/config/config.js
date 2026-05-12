@@ -13,6 +13,7 @@ const config = {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
+    PINECONE_API_KEY: process.env.PINECONE_API_KEY,
 }
 
 export default config;

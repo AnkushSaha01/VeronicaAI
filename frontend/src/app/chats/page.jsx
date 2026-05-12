@@ -14,7 +14,9 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,11 +26,18 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
   const onSubmit = (e) => {
     e.preventDefault();
-    if (input.trim() === "") return;
-    handleSendMessage(input, webSearchEnabled);
+    if (input.trim() === "" && !selectedFile) return;
+    handleSendMessage(input, webSearchEnabled, selectedFile);
     setInput("");
+    setSelectedFile(null);
   };
 
   const handleKeyDown = (e) => {
@@ -91,31 +100,56 @@ export default function ChatPage() {
               </div>
             ) : (
               <div className="w-full max-w-3xl flex flex-col gap-6 py-8 mb-10 z-8">
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
+                {messages.map((msg, index) => {
+                  let fileAttachment = null;
+                  let displayContent = msg.content;
+
+                  if (msg.role === "user" && displayContent) {
+                    const fileMatch = displayContent.match(/^\[FILE:(.*?)\]\n\n/);
+                    if (fileMatch) {
+                      fileAttachment = fileMatch[1];
+                      displayContent = displayContent.replace(fileMatch[0], "");
+                    }
+                  }
+
+                  return (
                     <div
-                      className={`max-w-[85%] rounded-2xl px-5 py-3.5 ${
-                        msg.role === "user"
-                          ? "bg-[#2B2D31] text-gray-100 rounded-tr-sm shadow-md shadow-black/10"
-                          : "bg-transparent text-gray-200"
-                      }`}
+                      key={index}
+                      className={`flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}
                     >
-                      {msg.role === "assistant" && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="bg-white p-1 rounded-md inline-block">
-                            <Sparkles className="w-3 h-3 text-[#12141A] fill-[#12141A]" />
-                          </div>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Sense AI
+                      {fileAttachment && (
+                        <div className="bg-[#2B2D31] border border-white/5 rounded-xl p-3 flex flex-col gap-1.5 w-fit min-w-[160px]">
+                          <span className="text-[15px] font-medium text-gray-200 truncate max-w-[200px]">
+                            {fileAttachment.replace('.pdf', '')}
                           </span>
+                          <div className="flex items-center gap-1.5">
+                            <div className="bg-red-500 rounded px-1.5 py-0.5 flex items-center justify-center">
+                              <span className="text-[9px] font-bold text-white tracking-wider">PDF</span>
+                            </div>
+                            <span className="text-xs text-gray-300 font-medium tracking-wide">PDF</span>
+                          </div>
                         </div>
                       )}
-                      <div className="leading-relaxed text-[15px]">
-                        {msg.content ? (
-                          <ReactMarkdown
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-5 py-3.5 ${
+                          msg.role === "user"
+                            ? "bg-[#2B2D31] text-gray-100 rounded-tr-sm shadow-md shadow-black/10"
+                            : "bg-transparent text-gray-200"
+                        }`}
+                      >
+                        {msg.role === "assistant" && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="bg-white p-1 rounded-md inline-block">
+                              <Sparkles className="w-3 h-3 text-[#12141A] fill-[#12141A]" />
+                            </div>
+                            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                              Sense AI
+                            </span>
+                          </div>
+                        )}
+                        <div className="leading-relaxed text-[15px]">
+                          {displayContent ? (
+                            <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
                               p: ({ children }) => (
@@ -228,7 +262,7 @@ export default function ChatPage() {
                               ),
                             }}
                           >
-                            {msg.content}
+                            {displayContent}
                           </ReactMarkdown>
                         ) : (
                           msg.role === "assistant" && (
@@ -242,7 +276,8 @@ export default function ChatPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                );
+              })}
                 <div ref={messagesEndRef} />
               </div>
             )}
@@ -255,6 +290,37 @@ export default function ChatPage() {
                 onSubmit={onSubmit}
                 className="bg-[#130118] backdrop-blur-xl  rounded-[22px] p-2 flex flex-col shadow-2xl transition-all duration-500 ease-in-out focus-within:bg-[#100114] focus-within:border-[#c800ff]"
               >
+                {selectedFile && (
+                  <div className="px-4 pt-3 pb-1">
+                    <div className="bg-[#2B2D31] border border-white/5 rounded-xl p-3 flex flex-col gap-1.5 w-fit min-w-[160px] relative group">
+                      <button 
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        className="absolute -top-2 -right-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      >
+                        ×
+                      </button>
+                      <span className="text-[15px] font-medium text-gray-200 truncate max-w-[200px]">
+                        {selectedFile.name.replace('.pdf', '')}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="bg-red-500 rounded px-1.5 py-0.5 flex items-center justify-center">
+                          <span className="text-[9px] font-bold text-white tracking-wider">PDF</span>
+                        </div>
+                        <span className="text-xs text-gray-300 font-medium tracking-wide">PDF</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -267,6 +333,7 @@ export default function ChatPage() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
+                      onClick={() => fileInputRef.current?.click()}
                       className="p-2 text-gray-400 hover:text-gray-200 hover:bg-white/5 rounded-full transition-colors"
                     >
                       <Paperclip className="w-5 h-5" />
@@ -301,7 +368,7 @@ export default function ChatPage() {
                     <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
                     <button
                       type="submit"
-                      disabled={!input.trim()}
+                      disabled={!input.trim() && !selectedFile}
                       className="bg-white text-[#12141A] p-2 rounded-full disabled:opacity-50 disabled:bg-gray-600 disabled:text-gray-400 hover:scale-105 transition-all active:scale-95"
                     >
                       <Send className="w-4 h-4 translate-x-px" />

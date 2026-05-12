@@ -14,11 +14,11 @@ export const useChat = () => {
   const dispatch = useDispatch();
   const { activeChatId } = useSelector((state) => state.chat);
 
-  const handleSendMessage = async (userInput, webSearch = false) => {
+  const handleSendMessage = async (userInput, webSearch = false, file = null) => {
     dispatch(
       addMessage({
         role: "user",
-        content: userInput,
+        content: file ? `[FILE:${file.name}]\n\n${userInput}` : userInput,
         timestamp: Date.now(),
       }),
     );
@@ -41,7 +41,8 @@ export const useChat = () => {
         dispatch(addNewChat({ _id: chatId, title }));
         fetchChats();
       },
-      webSearch
+      webSearch,
+      file
     );
   };
 

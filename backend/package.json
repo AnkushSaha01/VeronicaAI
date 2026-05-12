@@ -13,10 +13,12 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@langchain/community": "^1.1.28",
     "@langchain/core": "^1.1.44",
     "@langchain/google-genai": "^2.1.30",
     "@langchain/mistralai": "^1.0.8",
     "@mistralai/mistralai": "^2.2.1",
+    "@pinecone-database/pinecone": "^7.2.0",
     "@tavily/core": "^0.7.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -26,9 +28,12 @@
     "langchain": "^1.4.0",
     "mongoose": "^9.6.1",
     "morgan": "^1.10.1",
+    "multer": "^2.1.1",
     "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pdf-parse": "^2.4.5",
+    "uuid": "^14.0.0",
     "zod": "^4.4.3"
   }
 }

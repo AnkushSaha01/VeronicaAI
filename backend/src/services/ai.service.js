@@ -4,6 +4,7 @@ import config from "../config/config.js";
 import { createAgent, toolStrategy, tool } from "langchain";
 import z from "zod";
 import { searchWeb } from "../tools/search.tool.js";
+import { ragSearch } from "../tools/rag.tool.js";
 
 const search_tool = tool(searchWeb, {
   name: "search_tool",
@@ -14,6 +15,15 @@ const search_tool = tool(searchWeb, {
   }),
 });
 
+const rag_tool = tool(ragSearch, {
+  name: "rag_tool",
+  description:
+    "Use this tool to search through the specific document database or internship details.",
+  schema: z.object({
+    query: z.string().describe("The specific query to search in the vector database"),
+  }),
+});
+
 const model = new ChatMistralAI({
   model: "mistral-medium-latest",
   apiKey: config.MISTRAL_API_KEY,
@@ -21,7 +31,7 @@ const model = new ChatMistralAI({
 
 const agent = createAgent({
   model,
-  tools: [search_tool],
+  tools: [search_tool, rag_tool],
 });
 export async function getStream(messages) {
   const response = await agent.stream(

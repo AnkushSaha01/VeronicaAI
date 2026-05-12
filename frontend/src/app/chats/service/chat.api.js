@@ -1,12 +1,24 @@
-export async function sendMessage(userInput, chatId = null, onChunk = (chunk) => {}, onNewChat = (chatData) => {}, webSearch = false) {
+export async function sendMessage(userInput, chatId = null, onChunk = (chunk) => {}, onNewChat = (chatData) => {}, webSearch = false, file = null) {
   const endpoint = webSearch ? "http://localhost:5000/api/chat/search" : "http://localhost:5000/api/chat";
+  
+  let body;
+  let headers = {};
+
+  if (file) {
+    body = new FormData();
+    body.append("message", userInput);
+    if (chatId) body.append("chatId", chatId);
+    body.append("pdf", file);
+  } else {
+    body = JSON.stringify({ message: userInput, chatId });
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     credentials: "include",
-    body: JSON.stringify({ message: userInput, chatId }),
+    body,
   });
 
   console.log(response);
