@@ -112,7 +112,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 </div>
                 <button
                   onClick={(e) => handleDeleteChat(e, chat._id)}
-                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-md hover:text-white hover:bg-red-400 transition-all duration-200 ${activeChatId === chat._id ? "text-white" : "text-gray-200"}`}
+                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-md hover:text-white  transition-all duration-200 ${activeChatId === chat._id ? "text-white hover:bg-black/50" : "text-gray-200 hover:bg-black/20"}`}
                   title="Delete chat"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

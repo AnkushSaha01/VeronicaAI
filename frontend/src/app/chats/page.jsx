@@ -90,7 +90,7 @@ export default function ChatPage() {
                 </span>
               </div>
             ) : (
-              <div className="w-full max-w-3xl flex flex-col gap-6 py-8 mb-10 z-100">
+              <div className="w-full max-w-3xl flex flex-col gap-6 py-8 mb-10 z-8">
                 {messages.map((msg, index) => (
                   <div
                     key={index}
