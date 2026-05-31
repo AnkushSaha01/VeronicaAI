@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   return (
     <aside
       className={`fixed md:relative top-0 left-0 h-full bg-black  flex flex-col transition-all duration-300 ease-in-out z-30 
-                ${isOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden"}
+                ${isOpen ? "w-72 translate-x-0" : "w-72 -translate-x-full overflow-hidden md:w-0 md:translate-x-0"}
             `}
     >
       {/* Header / New Chat */}

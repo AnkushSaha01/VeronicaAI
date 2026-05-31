@@ -12,11 +12,74 @@ export default function ChatPage() {
   const { messages } = useSelector((state) => state.chat);
   const { handleSendMessage } = useChat();
   const [input, setInput] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const startListening = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(
+        "Speech recognition is not supported in this browser. Please try Chrome, Edge, or Safari.",
+      );
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev) => (prev ? prev + " " + transcript : transcript));
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
+
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -92,7 +155,7 @@ export default function ChatPage() {
                 <h1 className="text-4xl mb-4 font-regular text-center text-gray-100 ">
                   Ready to Create Something New?
                 </h1>
-                <span className="text-md text-center mt-4 max-w-lg text-gray-500 ">
+                <span className="text-md text-center mt-4 max-w-lg text-gray-500 hidden md:block">
                   Experience Veronica.Experience real-time intelligence paired
                   with a beautifully rendered, highly responsive next-generation
                   AI assistant.
@@ -133,7 +196,7 @@ export default function ChatPage() {
                       <div
                         className={`max-w-[85%] rounded-2xl px-5 py-3.5 ${
                           msg.role === "user"
-                            ? "bg-[#2B2D31] text-gray-100 rounded-tr-sm shadow-md shadow-black/10"
+                            ? "bg-[#150b17] text-gray-100 rounded-tr-sm shadow-md shadow-black/10"
                             : "bg-transparent text-gray-200"
                         }`}
                       >
@@ -338,7 +401,7 @@ export default function ChatPage() {
                     >
                       <Paperclip className="w-5 h-5" />
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => setWebSearchEnabled(!webSearchEnabled)}
                       className={`p-2 rounded-full transition-all duration-200 active:scale-95 ${
@@ -353,19 +416,21 @@ export default function ChatPage() {
                       }
                     >
                       <Globe className="w-5 h-5" />
-                    </button>
+                    </button> */}
                     <button
                       type="button"
-                      className="p-2 text-gray-400 hover:text-gray-200 hover:bg-white/5 rounded-full transition-colors"
+                      onClick={handleMicClick}
+                      className={`p-2 rounded-full transition-all duration-200 active:scale-95 ${
+                        isListening
+                          ? "text-red-400 bg-red-500/10 border border-red-500/20 shadow-md shadow-red-500/5 animate-pulse hover:bg-red-500/20"
+                          : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                      }`}
+                      title={isListening ? "Listening... Click to stop" : "Use voice input"}
                     >
                       <Mic className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 hidden sm:inline-block">
-                      Incognito
-                    </span>
-                    <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
                     <button
                       type="submit"
                       disabled={!input.trim() && !selectedFile}
@@ -378,7 +443,7 @@ export default function ChatPage() {
               </form>
             </div>
             <div className="text-center mt-3">
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-gray-500 hidden md:block">
                 Sense AI may contain errors. We recommend checking important
                 information.
               </span>
