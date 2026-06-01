@@ -5,6 +5,10 @@ import connectDB from "./src/config/db.js";
 
 connectDB();
 
-app.listen(config.PORT, () => {
-    console.log(`Server running on port ${config.PORT}`);
-});
+if (!process.env.VERCEL) {
+    app.listen(config.PORT, () => {
+        console.log(`Server running on port ${config.PORT}`);
+    });
+}
+
+export default app;
