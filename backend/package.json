@@ -33,6 +33,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pdf-parse": "^2.4.5",
+    "url": "^0.11.4",
     "uuid": "^14.0.0",
     "zod": "^4.4.3"
   }
