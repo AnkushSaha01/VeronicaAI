@@ -44,14 +44,21 @@ app.use(passport.initialize());
 //   res.json({ ans });
 // });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.use("/api/chat", chatRoutes)
 app.use("/api/auth", authRoutes)  
 
+// Dynamic cross-platform public path resolution for local dev & Vercel serverless
+const getPublicPath = () => {
+    const cwd = process.cwd();
+    if (cwd.endsWith("backend")) {
+        return path.join(cwd, "public");
+    }
+    return path.join(cwd, "backend/public");
+};
+const publicPath = getPublicPath();
+
 // Serve static assets from public folder
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(publicPath));
 
 // SPA Catch-all routing
 app.get(/.*/, (req, res) => {
@@ -65,10 +72,14 @@ app.get(/.*/, (req, res) => {
         cleanPath = cleanPath.slice(0, -1);
     }
 
-    const filePath = path.join(__dirname, "../public", cleanPath + ".html");
+    const filePath = path.join(publicPath, cleanPath + ".html");
     res.sendFile(filePath, (err) => {
         if (err) {
-            res.sendFile(path.join(__dirname, "../public/index.html"));
+            res.sendFile(path.join(publicPath, "index.html"), (err2) => {
+                if (err2) {
+                    res.status(404).send("File not found");
+                }
+            });
         }
     });
 });
