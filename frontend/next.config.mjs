@@ -3,17 +3,13 @@ const nextConfig = {
   /* config options here */
   reactCompiler: true,
   output: "export",
+  
+
   images: {
-    unoptimized: true,
+    unoptimized: true, // REQUIRED for static export
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:5000/api/:path*",
-      },
-    ];
-  },
+
+  reactCompiler: true,
 };
 
 export default nextConfig;

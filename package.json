@@ -1,7 +1,9 @@
 {
-  "name": "veronica-ai-monolith",
-  "version": "1.0.0",
+  "name": "monolith-app",
+  "private": true,
   "scripts": {
-    "build": "cd frontend && npm install --legacy-peer-deps && npm run build && cd .. && node -e \"const fs=require('fs'); fs.mkdirSync('public', { recursive: true }); fs.cpSync('frontend/out', 'public', { recursive: true }); fs.mkdirSync('backend/public', { recursive: true }); fs.cpSync('frontend/out', 'backend/public', { recursive: true });\" && cd backend && npm install --legacy-peer-deps"
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "npm run build:frontend && rm -rf public && cp -r frontend/out public",
+    "start": "node backend/server.js"
   }
 }
