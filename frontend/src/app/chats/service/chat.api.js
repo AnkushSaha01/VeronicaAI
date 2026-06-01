@@ -1,5 +1,5 @@
 export async function sendMessage(userInput, chatId = null, onChunk = (chunk) => {}, onNewChat = (chatData) => {}, webSearch = false, file = null) {
-  const endpoint = webSearch ? "http://localhost:5000/api/chat/search" : "http://localhost:5000/api/chat";
+  const endpoint = "/api/chat";
   
   let body;
   let headers = {};
@@ -43,7 +43,7 @@ export async function sendMessage(userInput, chatId = null, onChunk = (chunk) =>
 }
 
 export async function getAllChats() {
-  const response = await fetch("http://localhost:5000/api/chat/allChats", {
+  const response = await fetch("/api/chat/allChats", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export async function getAllChats() {
 }
 
 export async function getChatMessages(chatId) {
-  const response = await fetch(`http://localhost:5000/api/chat/messages/${chatId}`, {
+  const response = await fetch(`/api/chat/messages/${chatId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -69,8 +69,21 @@ export async function getChatMessages(chatId) {
 }
 
 export async function getUser() {
-  const response = await fetch("http://localhost:5000/api/auth/me", {
+  const response = await fetch("/api/auth/me", {
     method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  const data = await response.json();
+  return data;
+}
+
+export async function deleteChat(chatId) {
+  const response = await fetch(`/api/chat/${chatId}`, {
+    method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },

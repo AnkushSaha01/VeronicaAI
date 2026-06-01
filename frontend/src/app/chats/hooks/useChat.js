@@ -1,4 +1,4 @@
-import { sendMessage, getAllChats, getChatMessages, getUser } from "../service/chat.api";
+import { sendMessage, getAllChats, getChatMessages, getUser, deleteChat } from "../service/chat.api";
 import {
   appendContentToLastMessage,
   addMessage,
@@ -6,7 +6,8 @@ import {
   addNewChat,
   setAllChats,
   setMessages,
-  setUser
+  setUser,
+  removeChat
 } from "../slice/chat.slice.js";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -91,10 +92,22 @@ export const useChat = () => {
     }
   }
 
+  const handleDeleteChat = async (chatId) => {
+    try {
+      const res = await deleteChat(chatId);
+      if (res && res.message) {
+        dispatch(removeChat(chatId));
+      }
+    } catch (error) {
+      console.error("handleDeleteChat error:", error);
+    }
+  }
+
   return {
     handleSendMessage,
     fetchChats,
     fetchChatMessages,
-    fetchUserData
+    fetchUserData,
+    handleDeleteChat
   };
 };

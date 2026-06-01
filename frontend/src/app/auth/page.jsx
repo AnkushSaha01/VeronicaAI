@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 export default function AuthPage() {
   const handleGoogleLogin = () => {
     // Redirect to the backend route that initiates Google OAuth
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "/api/auth/google";
   };
 
   return (

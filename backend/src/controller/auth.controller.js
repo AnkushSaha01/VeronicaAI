@@ -22,7 +22,8 @@ const googleAuthCallback = (req, res) => {
 
 
   // Redirect to frontend
-  res.redirect(`http://localhost:3000/chats`);
+  const redirectUrl = process.env.FRONTEND_URL || "";
+  res.redirect(`${redirectUrl}/chats`);
 };
 
 const getMe = async (req, res) => {

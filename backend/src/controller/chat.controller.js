@@ -124,6 +124,21 @@ export async function getMessages(req, res) {
   }
 }
 
+export async function deleteChat(req, res) {
+  const { chatId } = req.params;
+  const userId = req.user.id;
+  try {
+    const result = await chatDao.deleteChatForUser(chatId, userId);
+    if (result) {
+      res.json({ message: "Chat deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Chat not found or unauthorized" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 // const tvly = tavily({ apiKey: config.TAVILY_API_KEY });
 
 // export async function getAnswerWithInternetAccess(req, res) {

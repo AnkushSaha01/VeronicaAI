@@ -48,6 +48,13 @@ const chatSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
     },
+    removeChat: (state, action) => {
+      state.allChats = state.allChats.filter(c => c._id !== action.payload);
+      if (state.activeChatId === action.payload) {
+        state.messages = [];
+        state.activeChatId = null;
+      }
+    },
   },
 });
 
@@ -60,6 +67,7 @@ export const {
   setAllChats,
   setMessages,
   setUser,
+  removeChat,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

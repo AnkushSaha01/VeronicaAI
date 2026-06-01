@@ -20,3 +20,11 @@ export async function getAllChatsForUser(userId) {
 export async function getMessagesForChat(chatId) {
     return await messageModel.find({ chatId }).sort({ createdAt: 1 })
 }
+
+export async function deleteChatForUser(chatId, userId) {
+    const deletedChat = await chatModel.findOneAndDelete({ _id: chatId, user: userId });
+    if (deletedChat) {
+        await messageModel.deleteMany({ chatId });
+    }
+    return deletedChat;
+}

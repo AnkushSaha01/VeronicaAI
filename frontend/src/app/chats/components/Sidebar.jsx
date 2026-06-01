@@ -21,7 +21,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   const dispatch = useDispatch();
   const { activeChatId, allChats, user } = useSelector((state) => state.chat);
 
-  const { fetchChats, fetchChatMessages, fetchUserData } = useChat();
+  const { fetchChats, fetchChatMessages, fetchUserData, handleDeleteChat: deleteChatHook } = useChat();
   useEffect(() => {
     fetchChats();
     fetchUserData();
@@ -38,8 +38,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
 
   const handleDeleteChat = (e, id) => {
     e.stopPropagation();
-    // Placeholder for future delete integration
-    console.log("Delete chat:", id);
+    deleteChatHook(id);
   };
 
   return (
@@ -112,7 +111,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                 </div>
                 <button
                   onClick={(e) => handleDeleteChat(e, chat._id)}
-                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-md hover:text-white  transition-all duration-200 ${activeChatId === chat._id ? "text-white hover:bg-black/50" : "text-gray-200 hover:bg-black/20"}`}
+                  className={`shrink-0 relative z-20 p-1 rounded-md hover:text-white transition-all duration-200 ${activeChatId === chat._id ? "text-white bg-black/50" : "text-gray-200 bg-black/20"}`}
                   title="Delete chat"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
