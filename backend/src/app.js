@@ -50,6 +50,10 @@ const __dirname = path.dirname(__filename);
 app.use("/api/chat", chatRoutes)
 app.use("/api/auth", authRoutes)  
 
+// Support prefix-stripped paths for Vercel serverless routing
+app.use("/chat", chatRoutes)
+app.use("/auth", authRoutes)  
+
 // Serve static assets from public folder
 app.use(express.static(path.join(__dirname, "../public")));
 
