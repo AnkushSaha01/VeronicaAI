@@ -56,27 +56,27 @@ const publicPath = path.join(__dirname, "../public");
 app.use(express.static(publicPath));
 
 // SPA fallback
-// app.use((req, res) => {
-//   res.sendFile(path.join(publicPath, "index.html"));
-// });
-
-
-app.get(/.*/, (req, res) => {
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({ message: "API route not found" });
-  }
-
-  const filePath = path.join(
-    __dirname,
-    "../public",
-    req.path.endsWith("/") ? `${req.path}index.html` : `${req.path}.html`
-  );
-
-  res.sendFile(filePath, err => {
-    if (err) {
-      res.sendFile(path.join(__dirname, "../public/index.html"));
-    }
-  });
+app.use((req, res) => {
+  res.sendFile(path.join(publicPath, "index.html"));
 });
+
+
+// app.get(/.*/, (req, res) => {
+//   if (req.path.startsWith("/api/")) {
+//     return res.status(404).json({ message: "API route not found" });
+//   }
+
+//   const filePath = path.join(
+//     __dirname,
+//     "../public",
+//     req.path.endsWith("/") ? `${req.path}index.html` : `${req.path}.html`
+//   );
+
+//   res.sendFile(filePath, err => {
+//     if (err) {
+//       res.sendFile(path.join(__dirname, "../public/index.html"));
+//     }
+//   });
+// });
 
 export default app;
