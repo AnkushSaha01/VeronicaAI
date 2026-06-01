@@ -15,14 +15,19 @@ const googleAuthCallback = (req, res) => {
   );
 
   // Set token in an HTTP-only cookie (adjust domain/secure settings as needed for production)
-  res.cookie("token", token);
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
   // Grab the explicit message set by Passport
   // const authMsg = req.user.authMessage || "loggedIn";
 
 
   // Redirect to frontend
-  const redirectUrl = process.env.FRONTEND_URL || "";
+  const redirectUrl = process.env.FRONTEND_URL || "https://veronicaai-goy5.onrender.com";
   res.redirect(`${redirectUrl}/chats`);
 };
 
