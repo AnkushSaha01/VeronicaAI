@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 
 export default function ChatPage() {
   const { messages } = useSelector((state) => state.chat);
-  const { handleSendMessage } = useChat();
+  const { handleSendMessage, fetchUserData } = useChat();
   const [input, setInput] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
@@ -20,6 +20,10 @@ export default function ChatPage() {
 
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     return () => {
