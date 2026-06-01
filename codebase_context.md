@@ -16,11 +16,26 @@ Veronica AI is built as a **Monolithic Single-Page Application (SPA)** utilizing
 To prevent client-side pages from throwing `404` errors on refresh under monolithic hosting:
 1. **Static Export**: The Next.js config specifies `output: "export"`, exporting static HTML, CSS, and JS files to the `frontend/out` folder.
 2. **Static Asset Copier**: The root build script copies these compiled assets directly to `backend/public`.
-3. **Wildcard Fallback (SPA routing)**: In `backend/src/app.js`, after exposing standard API routes, Express maps all unmatched requests to `/index.html` using a wildcard fallback middleware:
+3. **Clean-Path Fallback (SPA routing)**: In `backend/src/app.js`, after exposing standard API routes, Express maps all unmatched requests dynamically to their corresponding `.html` exported pages (e.g. serving `chats.html` directly for a `/chats` path request), only falling back to `/index.html` if the static file is not found:
    ```javascript
    app.use(express.static(publicPath));
    app.use((req, res) => {
-     res.sendFile(path.join(publicPath, "index.html"));
+     if (req.path.startsWith("/api/")) {
+       return res.status(404).json({ message: "API route not found" });
+     }
+     let cleanPath = req.path;
+     if (cleanPath.endsWith("/") && cleanPath.length > 1) {
+       cleanPath = cleanPath.slice(0, -1);
+     }
+     if (cleanPath === "" || cleanPath === "/") {
+       return res.sendFile(path.join(publicPath, "index.html"));
+     }
+     const filePath = path.join(publicPath, cleanPath + ".html");
+     res.sendFile(filePath, (err) => {
+       if (err) {
+         res.sendFile(path.join(publicPath, "index.html"));
+       }
+     });
    });
    ```
 
@@ -1139,10 +1154,25 @@ When deployed on **Render**:
 
 When extending or maintaining this project, keep in mind these key architectural enhancements that were introduced:
 
-1. **Express 5.x Wildcard Constraints**: Under Express 5.x, using the standard wildcard symbol `*` for catch-all middleware throws runtime `PathError` exceptions. SPA fallback routing is securely implemented using a functional catch-all callback instead:
+1. **Express 5.x Wildcard Constraints**: Under Express 5.x, using the standard wildcard symbol `*` for catch-all middleware throws runtime `PathError` exceptions. SPA fallback routing is securely implemented using a functional catch-all callback instead, which dynamically checks clean paths and serves targeted exported static files like `chats.html` to avoid redirection loops:
    ```javascript
    app.use((req, res) => {
-     res.sendFile(path.join(publicPath, "index.html"));
+     if (req.path.startsWith("/api/")) {
+       return res.status(404).json({ message: "API route not found" });
+     }
+     let cleanPath = req.path;
+     if (cleanPath.endsWith("/") && cleanPath.length > 1) {
+       cleanPath = cleanPath.slice(0, -1);
+     }
+     if (cleanPath === "" || cleanPath === "/") {
+       return res.sendFile(path.join(publicPath, "index.html"));
+     }
+     const filePath = path.join(publicPath, cleanPath + ".html");
+     res.sendFile(filePath, (err) => {
+       if (err) {
+         res.sendFile(path.join(publicPath, "index.html"));
+       }
+     });
    });
    ```
 2. **Pinecone JS SDK v7 Ingestion Option wrapping**: The latest Pinecone upsert logic expects record collections to be structured within an index request options container (`index.upsert({ records })`) to satisfy TypeScript compiler typings.

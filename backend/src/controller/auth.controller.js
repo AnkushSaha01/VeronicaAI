@@ -28,7 +28,7 @@ const googleAuthCallback = (req, res) => {
 
   // Redirect to frontend
   // const redirectUrl = "https://veronicaai-1.onrender.com";
-  res.redirect(`/chats`);
+  res.redirect(`https://veronicaai-1.onrender.com/chats`);
 };
 
 const getMe = async (req, res) => {
