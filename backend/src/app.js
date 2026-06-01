@@ -13,12 +13,14 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-    origin: process.env.FRONTEND_URL || true,
+    origin: "https://veronicaai-1.onrender.com",
     credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
+
+app.set("trust proxy", 1);
 app.use(cookieParser());
 
 
