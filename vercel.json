@@ -1,12 +1,10 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "builds": [
     {
       "src": "backend/server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": "backend/public/**"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -15,8 +13,11 @@
       "dest": "backend/server.js"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "backend/server.js"
+      "dest": "/index.html"
     }
   ]
 }
