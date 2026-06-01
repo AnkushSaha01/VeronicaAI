@@ -6,7 +6,7 @@ export default (passport) => {
   passport.use(new GoogleStrategy({
     clientID: config.GOOGLE_CLIENT_ID,
     clientSecret: config.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://veronicaai-goy5.onrender.com/api/auth/google/callback',
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       // 1. Check if user already exists with this Google ID
